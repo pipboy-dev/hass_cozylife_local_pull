@@ -1,6 +1,6 @@
-# CozyLife Local Pull - Home Assistant Integration
+# CozyLife Local Pull - Home Assistant Integration Forked from zqbake
 
-[![GitHub Release](https://img.shields.io/github/v/release/zqbake/hass_cozylife_local_pull)](https://github.com/zqbake/hass_cozylife_local_pull/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/zqbake/hass_cozylife_local_pull)](https://github.com/pipboy-dev/hass_cozylife_local_pull/releases)
 [![License](https://img.shields.io/github/license/zqbake/hass_cozylife_local_pull)](LICENSE)
 [![hacs][hacs-shield]][hacs-url]
 
@@ -41,7 +41,7 @@ Home Assistant integration for controlling CozyLife smart devices over local net
 Or manually:
 1. Click **HACS** > **Integrations**
 2. Click **⋮** > **Custom repositories**
-3. Add this repository URL: `https://github.com/zqbake/hass_cozylife_local_pull`
+3. Add this repository URL: `https://github.com/pipboy-dev/hass_cozylife_local_pull`
 4. Category: **Integration**
 5. Click **Add**
 6. Search for "CozyLife Local" and click **Install**
@@ -51,7 +51,7 @@ Or manually:
 
 1. Clone this repository to your `custom_components` directory:
 ```bash
-git clone https://github.com/zqbake/hass_cozylife_local_pull.git custom_components/hass_cozylife_local_pull
+git clone https://github.com/pipboy-dev/hass_cozylife_local_pull.git custom_components/hass_cozylife_local_pull
 ```
 
 2. Restart Home Assistant
@@ -115,7 +115,7 @@ Then restart Home Assistant.
 
 ## Support
 
-- 📝 Submit an [Issue](https://github.com/zqbake/hass_cozylife_local_pull/issues) on GitHub
+- 📝 Submit an [Issue](https://github.com/pipboy-dev/hass_cozylife_local_pull/issues) on GitHub
 - 💬 Discuss on [Home Assistant Community](https://community.home-assistant.io/)
 - 📧 Email: info@cozylife.app
 

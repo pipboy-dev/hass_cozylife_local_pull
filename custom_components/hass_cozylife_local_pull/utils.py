@@ -4,7 +4,6 @@ import time
 import requests
 import logging
 from .const import (
-    API_DOMAIN,
     LANG
 )
 _LOGGER = logging.getLogger(__name__)
@@ -36,17 +35,22 @@ def get_pid_list(lang='en') -> list:
         _LOGGER.info(f'not support lang={lang}, will set lang={LANG}')
         lang = LANG
 
-    res = requests.get(f'http://{API_DOMAIN}/api/v2/device_product/model', {
-        'lang': lang
-    }, timeout=3)
+    # res = requests.get(f'http://{API_DOMAIN}/api/v2/device_product/model', {
+    #     'lang': lang
+    # }, timeout=3)
     
-    if 200 != res.status_code:
-        _LOGGER.info('get_pid_list.result is none')
-        return []
+    # if 200 != res.status_code:
+    #     _LOGGER.info('get_pid_list.result is none')
+    #     return []
     try:
-        pid_list = json.loads(res.content)
-    except:
+        import os
+        cwd = os.getcwd()
+        _LOGGER.info(cwd)
+        with open("./custom_components/hass_cozylife_local_pull/device_info.json", "r", encoding="utf-8") as dev_info:
+            pid_list = json.load(dev_info)
+    except Exception as e:
         _LOGGER.info('get_pid_list.result is not json')
+        _LOGGER.error(e)
         return []
     
     if pid_list.get('ret') is None:

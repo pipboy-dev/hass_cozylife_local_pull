@@ -121,6 +121,9 @@ Then restart Home Assistant.
 
 ## Changelog
 
+### v0.3.1 (2026)
+- ✨ Removed unnecessary external http request
+
 ### v0.3.0 (2024)
 - ✨ Complete async architecture upgrade
 - ✨ Periodic automatic device discovery (every 5 minutes)

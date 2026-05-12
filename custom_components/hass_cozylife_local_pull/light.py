@@ -80,7 +80,7 @@ class CozyLifeLight(LightEntity):
         self._attr_max_color_temp_kelvin = DEFAULT_MAX_KELVIN
 
         # Initialize supported color modes - start with basic modes
-        self._attr_supported_color_modes = {ColorMode.BRIGHTNESS, ColorMode.ONOFF}
+        self._attr_supported_color_modes = set()
         self._attr_color_mode = ColorMode.BRIGHTNESS
 
         # Add color modes based on device capabilities
@@ -94,6 +94,9 @@ class CozyLifeLight(LightEntity):
             # Device supports HS color
             self._attr_color_mode = ColorMode.HS
             self._attr_supported_color_modes.add(ColorMode.HS)
+        else:
+            # If no color modes, at least support brightness
+            self._attr_supported_color_modes.add(ColorMode.BRIGHTNESS)
 
         _LOGGER.debug(
             f"Device {device.device_id}: dpid={device.dpid}, "

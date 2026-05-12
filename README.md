@@ -121,6 +121,9 @@ Then restart Home Assistant.
 
 ## Changelog
 
+### v0.3.2 (2026)
+- ✨ Fixed light supported color modes attributes (HA reject setting both BRIGHTNESS and ONOFF)
+
 ### v0.3.1 (2026)
 - ✨ Removed unnecessary external http request
 

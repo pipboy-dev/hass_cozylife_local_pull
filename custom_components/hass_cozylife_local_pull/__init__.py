@@ -118,7 +118,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "device_manager": device_manager,
         "tcp_clients": tcp_clients,
         "scan_interval": scan_interval,
-        "last_scan_ips": set(all_ips),
+        # Only remember IPs we actually connected to: an IP that failed here
+        # (e.g. device offline while HA starts) must stay "new" so that the
+        # periodic discovery keeps retrying it instead of forgetting it.
+        "last_scan_ips": {device._ip for device in tcp_clients},
     }
 
     # Setup platforms - even if no devices connected yet
@@ -209,26 +212,41 @@ async def _async_periodic_discovery(
             data = hass.data[DOMAIN][entry.entry_id]
             last_scan_ips = data.get("last_scan_ips", set())
 
-            # Check for new devices
+            # Check for new devices (also includes configured/discovered IPs
+            # that could not be connected yet, so they are retried every scan)
             new_ips = all_ips - last_scan_ips
+            failed_ips: set[str] = set()
+            reachable_new_ips: set[str] = set()
             if new_ips:
-                _LOGGER.info(f"Found new devices: {new_ips}")
+                _LOGGER.debug(f"Trying devices not connected yet: {new_ips}")
 
                 for ip in new_ips:
+                    probe = CozyLifeDevice(ip)
                     try:
-                        device = CozyLifeDevice(ip)
-                        if await device.async_connect():
-                            device_manager.add_device(device)
-                            device_manager.register_device(device)
-                            data["tcp_clients"].append(device)
-                            _LOGGER.info(f"Successfully connected to new device at {ip}")
-
-                            # Reload platforms to add new entities
-                            await hass.config_entries.async_reload(entry.entry_id)
+                        if await probe.async_connect():
+                            reachable_new_ips.add(ip)
+                            _LOGGER.info(f"Device at {ip} is now reachable")
                         else:
-                            _LOGGER.warning(f"Failed to connect to new device at {ip}")
+                            failed_ips.add(ip)
+                            _LOGGER.debug(f"Device at {ip} still not reachable")
                     except Exception as e:
-                        _LOGGER.error(f"Error connecting to new device {ip}: {e}")
+                        failed_ips.add(ip)
+                        _LOGGER.debug(f"Error connecting to device {ip}: {e}")
+                    finally:
+                        # The entry reload below sets the device up again from
+                        # scratch, so never keep the probe connection open.
+                        await probe.async_disconnect()
+
+            if reachable_new_ips:
+                # Reload the entry so the platforms create the new entities.
+                # Must be scheduled outside this task: unloading the entry
+                # cancels this very task, which would abort an awaited reload
+                # halfway through.
+                _LOGGER.info(
+                    f"Reloading {DOMAIN} to add devices: {reachable_new_ips}"
+                )
+                hass.config_entries.async_schedule_reload(entry.entry_id)
+                return
 
             # Check for devices that disappeared
             disappeared_ips = last_scan_ips - all_ips
@@ -239,8 +257,9 @@ async def _async_periodic_discovery(
                         await device.async_disconnect()
                         device_manager.remove_device(device.device_id)
 
-            # Update last scan IPs
-            data["last_scan_ips"] = all_ips
+            # Update last scan IPs (without the ones still unreachable, so they
+            # are retried on the next scan)
+            data["last_scan_ips"] = all_ips - failed_ips
 
             # Check device availability
             for device in device_manager.get_all_devices():
